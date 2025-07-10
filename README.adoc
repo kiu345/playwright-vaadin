@@ -1,0 +1,47 @@
+# Helper classes to write java Playwright tests for Vaadin
+
+This library implements some helper methods to simplify testing Vaadin 24+ interfaces in 
+a playwright test case. This simplifies handling with the sometimes tricky shadow DOM
+of Vaadin.
+
+*pom.xml*
+
+[source, xml]
+----
+<dependency>
+    <groupId>net.qdevzone</groupId>
+    <artifactId>playwright-vaadin</artifactId>
+    <version>0.0.1</version>
+    <scope>test</scope>
+</dependency>
+----
+
+*UI:*
+[source, java]
+----
+ComboBox<String> comboBox1 = new ComboBox<>("Option");
+comboBox1.setId("box1");
+comboBox1.setItems("Option1", "Option2", "Option3");
+comboBox1.addValueChangeListener(e -> {
+   System.out.println(comboBox1.getValue()); 
+});
+----
+
+*Test*
+[source, java]
+----
+page.navigate("http://localhost:" + port + "/combobox");
+page.waitForSelector("vaadin-combo-box");
+
+assertThat(page.isVisible("vaadin-combo-box")).isTrue();
+
+ComboBoxHelper comboBox1 = ComboBoxHelper.forId(page, "box1");
+comboBox1.setValue("Option2");
+assertThat(comboBox1.getValue()).isEqualTo("Option2");
+----
+
+[NOTE]
+====
+This project is in alpha stage and does not provide any binaries. Check out the repository and run a 
+`mvn install` to add them to your local repository to use.
+====
