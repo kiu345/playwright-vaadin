@@ -1,5 +1,6 @@
 package net.qdevzone.playwright.vaadin;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
 public abstract class VaadinHelper {
@@ -20,4 +21,19 @@ public abstract class VaadinHelper {
     public TARGETTYPE getTargetType() {
         return targetType;
     }
+    
+    protected static void assertExactlyOne(Locator locator) {
+        int count = locator.count();
+        if (count != 1) {
+            throw new IllegalArgumentException("Expected exactly 1 element for " + locator.toString() + ", but found " + count);
+        }
+    }
+
+    protected static void assertExactlyOne(Locator locator, String method, String value) {
+        int count = locator.count();
+        if (count != 1) {
+            throw new IllegalArgumentException("Expected exactly 1 element for " + method + ": \"" + value + "\", but found " + count);
+        }
+    }
+
 }
