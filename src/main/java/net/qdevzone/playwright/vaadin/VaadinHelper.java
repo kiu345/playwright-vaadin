@@ -7,7 +7,8 @@ public abstract class VaadinHelper {
     public enum TARGETTYPE {
         ID,
         TEXT,
-        LABEL
+        LABEL,
+        TESTID
     }
 
     protected final Page page;
