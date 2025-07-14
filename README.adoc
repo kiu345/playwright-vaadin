@@ -33,9 +33,9 @@ comboBox1.addValueChangeListener(e -> {
 page.navigate("http://localhost:" + port + "/combobox");
 page.waitForSelector("vaadin-combo-box");
 
-assertThat(page.isVisible("vaadin-combo-box")).isTrue();
+assertTrue(InputFieldHelper.fromLabel(page, "Text Field").isReadOnly());
 
-ComboBoxHelper comboBox1 = ComboBoxHelper.forId(page, "box1");
+ComboBoxHelper comboBox1 = ComboBoxHelper.fromId(page, "box1");
 comboBox1.setValue("Option2");
 assertThat(comboBox1.getValue()).isEqualTo("Option2");
 ----

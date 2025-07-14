@@ -9,8 +9,8 @@ import com.microsoft.playwright.Page;
 
 public class TimePickerHelper extends DateTimeHelperBase<LocalTime> {
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-    
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
     protected TimePickerHelper(Page page, TARGETTYPE targetType, Locator locator) {
         super(page, targetType, locator);
     }
@@ -31,20 +31,56 @@ public class TimePickerHelper extends DateTimeHelperBase<LocalTime> {
         return LocalTime.from(temporal);
     }
 
-    public static TimePickerHelper fromId(Page page, String id) {
-        Locator locator = page.locator("#" + id);
-        if (locator.count() != 1) {
-            throw new IllegalArgumentException("Invalid number (" + locator.count() + "!=1) of elements found with id: " + id);
-        }
-        return new TimePickerHelper(page, TARGETTYPE.ID, locator);
+    @Override
+    public boolean isRequired() {
+        return "true".equalsIgnoreCase(input.getAttribute("required"))
+                || "".equalsIgnoreCase(input.getAttribute("required"));
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return "true".equalsIgnoreCase(input.getAttribute("readonly"))
+                || "".equalsIgnoreCase(input.getAttribute("readonly"));
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return input.isEnabled();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return input.isVisible();
+    }
+
+    /**
+     * Factory method to create an TimePickerHelper based on an HTML ID.
+     */
+    public static TimePickerHelper fromId(Page page, String id) {
+        return new TimePickerHelper(page, TARGETTYPE.ID, locateById(page, id));
+    }
+
+    /**
+     * Factory method to create an TimePickerHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
+     */
+    public static TimePickerHelper fromName(Page page, String name) {
+        return new TimePickerHelper(page, TARGETTYPE.NAME, locateByName(page, name));
+    }
+
+    /**
+     * Factory method to create an TimePickerHelper for a element with a given label.
+     */
     public static TimePickerHelper fromLabel(Page page, String label) {
-        Locator locator = page.locator("vaadin-time-picker").getByLabel(label);
-        if (locator.count() != 1) {
-            throw new IllegalArgumentException("Invalid number (" + locator.count() + "!=1) of elements found with text: " + label);
-        }
-        return new TimePickerHelper(page, TARGETTYPE.TEXT, locator);
+        return new TimePickerHelper(page, TARGETTYPE.LABEL, locateByLabel(page, "vaadin-time-picker", label));
+    }
+
+    /**
+     * Factory method to create an TimePickerHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
+     */
+    public static TimePickerHelper fromTestId(Page page, String testId) {
+        return new TimePickerHelper(page, TARGETTYPE.TESTID, locateByTestId(page, testId));
     }
 
 }

@@ -8,15 +8,12 @@ import com.microsoft.playwright.JSHandle;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
-public class ListBoxHelper extends VaadinHelper {
+public class ListBoxHelper extends VaadinLocatorHelper {
 
-    private final Locator locator;
     private final boolean multiSelect;
 
     protected ListBoxHelper(Page page, TARGETTYPE targetType, Locator locator) {
-        super(page, targetType);
-        this.locator = locator;
-        assertExactlyOne(locator);
+        super(page, targetType, locator);
         this.multiSelect = isMultiSelectComponent(locator);
     }
 
@@ -138,34 +135,54 @@ public class ListBoxHelper extends VaadinHelper {
     }
 
     /**
-     * Checks whether the list box is visible.
+     * Checks whether the element is marked as required.
      */
+    public boolean isRequired() {
+        return "true".equalsIgnoreCase(locator.getAttribute("required"))
+                || "".equalsIgnoreCase(locator.getAttribute("required"));
+    }
+
+    /**
+     * Checks whether the element is marked as read-only.
+     */
+    public boolean isReadOnly() {
+        return "true".equalsIgnoreCase(locator.getAttribute("readonly"))
+                || "".equalsIgnoreCase(locator.getAttribute("readonly"));
+    }
+
+    @Override
     public boolean isVisible() {
         return locator.isVisible();
     }
 
     /**
-     * Checks whether the list box is enabled.
+     * Checks whether the element is enabled (i.e. not disabled).
      */
     public boolean isEnabled() {
-        return locator.isEnabled();
+        String disabled = locator.getAttribute("disabled");
+        return disabled == null;
     }
 
     /**
-     * Creates a ListBoxHelper from a component ID.
+     * Factory method to locate a ListBoxHelper by its id attribute.
      */
     public static ListBoxHelper fromId(Page page, String id) {
-        Locator locator = page.locator("#" + id);
-        assertExactlyOne(locator, "id", id);
-        return new ListBoxHelper(page, TARGETTYPE.ID, locator);
+        return new ListBoxHelper(page, TARGETTYPE.ID, locateById(page, id));
     }
 
     /**
-     * Creates a ListBoxHelper from a data-testid attribute.
+     * Factory method to create an ListBoxHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
+     */
+    public static ListBoxHelper fromName(Page page, String name) {
+        return new ListBoxHelper(page, TARGETTYPE.NAME, locateByName(page, name));
+    }
+
+    /**
+     * Factory method to create an ListBoxHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
      */
     public static ListBoxHelper fromTestId(Page page, String testId) {
-        Locator locator = page.getByTestId(testId);
-        assertExactlyOne(locator, "testId", testId);
-        return new ListBoxHelper(page, TARGETTYPE.TESTID, locator);
+        return new ListBoxHelper(page, TARGETTYPE.TESTID, locateByTestId(page, testId));
     }
 }

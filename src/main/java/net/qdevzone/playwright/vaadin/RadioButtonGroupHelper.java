@@ -11,14 +11,19 @@ import com.microsoft.playwright.Page;
  * Helper class for interacting with Vaadin RadioButtonGroup components in Playwright tests.
  * Supports reading and setting the selected value, checking available options, visibility, and enabled state.
  */
-public class RadioButtonGroupHelper extends VaadinHelper {
-
-    private final Locator locator;
+public class RadioButtonGroupHelper extends VaadinFieldHelper {
 
     protected RadioButtonGroupHelper(Page page, TARGETTYPE targetType, Locator locator) {
-        super(page, targetType);
-        this.locator = locator;
-        assertExactlyOne(locator);
+        super(page, targetType, locator);
+    }
+
+    /**
+     * Selects the option with the given value.
+     * 
+     * @param value option value to select
+     */
+    public void setValue(String value) {
+        locator.evaluate("(el,value) => el.value = value", value);
     }
 
     /**
@@ -31,12 +36,10 @@ public class RadioButtonGroupHelper extends VaadinHelper {
     }
 
     /**
-     * Selects the option with the given value.
-     * 
-     * @param value option value to select
+     * Clears the selection in the RadioButtonGroup.
      */
-    public void setValue(String value) {
-        locator.evaluate("(el,value) => el.value = value", value);
+    public void clear() {
+        setValue(null);
     }
 
     /**
@@ -70,56 +73,39 @@ public class RadioButtonGroupHelper extends VaadinHelper {
         return result;
     }
 
-    /**
-     * Checks whether the RadioButtonGroup is visible.
-     * 
-     * @return true if visible, false otherwise
-     */
-    public boolean isVisible() {
-        return locator.isVisible();
-    }
-
-    /**
-     * Checks whether the RadioButtonGroup is enabled (not disabled).
-     * 
-     * @return true if enabled, false otherwise
-     */
+    @Override
     public boolean isEnabled() {
         String disabled = locator.getAttribute("disabled");
         return disabled == null;
     }
 
     /**
-     * Clears the selection in the RadioButtonGroup.
+     * Factory method to locate a RadioButtonGroup by its id attribute.
      */
-    public void clear() {
-        setValue(null);
+    public static RadioButtonGroupHelper fromId(Page page, String id) {
+        return new RadioButtonGroupHelper(page, TARGETTYPE.ID, locateById(page, id));
     }
 
     /**
-     * Factory method to locate a RadioButtonGroup by its id attribute.
-     * 
-     * @param page Playwright Page
-     * @param id   id attribute of the RadioButtonGroup
-     * @return RadioButtonGroupHelper instance
+     * Factory method to create an RadioButtonGroupHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
      */
-    public static RadioButtonGroupHelper fromId(Page page, String id) {
-        Locator locator = page.locator("#" + id);
-        assertExactlyOne(locator, "id", id);
-        return new RadioButtonGroupHelper(page, TARGETTYPE.ID, locator);
+    public static RadioButtonGroupHelper fromName(Page page, String name) {
+        return new RadioButtonGroupHelper(page, TARGETTYPE.NAME, locateByName(page, name));
     }
 
     /**
      * Factory method to locate a RadioButtonGroup by its label attribute.
-     * 
-     * @param page  Playwright Page
-     * @param label label attribute of the RadioButtonGroup
-     * @return RadioButtonGroupHelper instance
      */
     public static RadioButtonGroupHelper fromLabel(Page page, String label) {
-        Locator locator = page.locator("vaadin-radio-group[label='" + label + "']");
-        assertExactlyOne(locator, "label", label);
-        return new RadioButtonGroupHelper(page, TARGETTYPE.TEXT, locator);
+        return new RadioButtonGroupHelper(page, TARGETTYPE.LABEL, locateByLabel(page, "vaadin-radio-group", label));
     }
 
+    /**
+     * Factory method to create an RadioButtonGroupHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
+     */
+    public static RadioButtonGroupHelper fromTestId(Page page, String testId) {
+        return new RadioButtonGroupHelper(page, TARGETTYPE.TESTID, locateByTestId(page, testId));
+    }
 }

@@ -9,9 +9,8 @@ import com.microsoft.playwright.Page;
 
 public class DateTimePickerHelper extends DateTimeHelperBase<LocalDateTime> {
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm");
 
-    
     protected DateTimePickerHelper(Page page, TARGETTYPE targetType, Locator locator) {
         super(page, targetType, locator);
     }
@@ -19,7 +18,6 @@ public class DateTimePickerHelper extends DateTimeHelperBase<LocalDateTime> {
     @Override
     public void setValue(LocalDateTime value) {
         String valueString = formatter.format(value);
-        System.out.println(valueString);
         setValue(valueString);
     }
 
@@ -33,20 +31,56 @@ public class DateTimePickerHelper extends DateTimeHelperBase<LocalDateTime> {
         return LocalDateTime.from(temporal);
     }
 
-    public static DateTimePickerHelper fromId(Page page, String id) {
-        Locator locator = page.locator("#" + id);
-        if (locator.count() != 1) {
-            throw new IllegalArgumentException("Invalid number (" + locator.count() + "!=1) of elements found with id: " + id);
-        }
-        return new DateTimePickerHelper(page, TARGETTYPE.ID, locator);
+    @Override
+    public boolean isRequired() {
+        return "true".equalsIgnoreCase(input.first().getAttribute("required"))
+                || "".equalsIgnoreCase(input.first().getAttribute("required"));
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return "true".equalsIgnoreCase(input.first().getAttribute("readonly"))
+                || "".equalsIgnoreCase(input.first().getAttribute("readonly"));
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return input.first().isEnabled();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return input.first().isVisible();
+    }
+
+    /**
+     * Factory method to create an DateTimePickerHelper based on an HTML ID.
+     */
+    public static DateTimePickerHelper fromId(Page page, String id) {
+        return new DateTimePickerHelper(page, TARGETTYPE.ID, locateById(page, id));
+    }
+
+    /**
+     * Factory method to create an DateTimePickerHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
+     */
+    public static DateTimePickerHelper fromName(Page page, String name) {
+        return new DateTimePickerHelper(page, TARGETTYPE.NAME, locateByName(page, name));
+    }
+
+    /**
+     * Factory method to create an DateTimePickerHelper for a element with a given label.
+     */
     public static DateTimePickerHelper fromLabel(Page page, String label) {
-        Locator locator = page.locator("vaadin-date-time-picker").getByLabel(label);
-        if (locator.count() != 1) {
-            throw new IllegalArgumentException("Invalid number (" + locator.count() + "!=1) of elements found with text: " + label);
-        }
-        return new DateTimePickerHelper(page, TARGETTYPE.TEXT, locator);
+        return new DateTimePickerHelper(page, TARGETTYPE.LABEL, locateByLabel(page, "vaadin-date-time-picker", label));
+    }
+
+    /**
+     * Factory method to create an DateTimePickerHelper based on the 'name' attribute.
+     * Note: Vaadin typically does not expose the 'name' attribute via API by default.
+     */
+    public static DateTimePickerHelper fromTestId(Page page, String testId) {
+        return new DateTimePickerHelper(page, TARGETTYPE.TESTID, locateByTestId(page, testId));
     }
 
 }
